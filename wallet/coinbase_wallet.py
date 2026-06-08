@@ -109,12 +109,13 @@ def _fetch_with_retry(url, method="GET", data=None, max_retries=3, timeout=10, v
 
 def _get_wallet_balance_from_node(address):
     """Get wallet balance from RustChain node."""
-    url = f"{NODE_URL}/wallet/balance/{address}"
+    url = f"{NODE_URL}/wallet/balance?miner_id={address}"
     payload, error = _fetch_with_retry(url)
     if error:
         return None, error
 
-    for field in ("balance", "amount_rtc", "amount"):
+    # Current API returns amount_rtc / amount_i64; also handle legacy "balance" field
+    for field in ("amount_rtc", "balance", "amount"):
         if field in payload:
             try:
                 return float(payload[field]), None
